@@ -99,13 +99,26 @@ class OptimizationParams(ParamGroup):
         self.optimizer_type = "default"
         super().__init__(parser, "Optimization Parameters")
 
-def get_combined_args(parser : ArgumentParser):
+def get_combined_args(parser : ArgumentParser, customized_setting={}):
     cmdlne_string = sys.argv[1:]
     cfgfile_string = "Namespace()"
     args_cmdline = parser.parse_args(cmdlne_string)
 
+    merged_dict = {}
+    for k,v in vars(args_cmdline).items():
+        if v != None:
+            merged_dict[k] = v
+    
+    # use the customized_setting dictionary to set specific value
     try:
-        cfgfilepath = os.path.join(args_cmdline.model_path, "cfg_args")
+        merged_dict["model_path"] = customized_setting["model_path"]
+    except KeyError:
+        print("model path not provided in customized setting")
+        pass
+
+    # for config file
+    try:
+        cfgfilepath = os.path.join(merged_dict["model_path"], "cfg_args")
         print("Looking for config file in", cfgfilepath)
         with open(cfgfilepath) as cfg_file:
             print("Config file found: {}".format(cfgfilepath))
@@ -115,8 +128,13 @@ def get_combined_args(parser : ArgumentParser):
         pass
     args_cfgfile = eval(cfgfile_string)
 
-    merged_dict = vars(args_cfgfile).copy()
-    for k,v in vars(args_cmdline).items():
+    for k,v in vars(args_cfgfile).items():
         if v != None:
             merged_dict[k] = v
+
+    # use the customized_setting dictionary to set specific value
+    for k,v in customized_setting.items():
+        if v != None:
+            merged_dict[k] = v
+    
     return Namespace(**merged_dict)
