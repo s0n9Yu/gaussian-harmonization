@@ -9,3 +9,4 @@ screenshots
 submodules/*
 dataset/*
 transform_and_render/*
+test.py

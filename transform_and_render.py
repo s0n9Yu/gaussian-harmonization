@@ -28,13 +28,12 @@ except:
     SPARSE_ADAM_AVAILABLE = False
 
 OUTPUT_PATH="/home_nfs/s0n9yu/gaussian-harmonization/transform_and_render"
-MODEL_PATH="/home_nfs/s0n9yu/gaussian-grouping/output/howardzhou_001_yellow_roses"
+MODEL_PATH="/home_nfs/s0n9yu/gaussian-grouping/output/testing"
 SOURCE_PATH="/home_nfs/s0n9yu/ibrnet_dataset/ibrnet_collected_1/howardzhou_001_yellow_roses"
 
 def render_set(model_path, name, iteration, views, gaussians, pipeline, background, train_test_exp, separate_sh):
     render_path = os.path.join(OUTPUT_PATH, os.path.basename(model_path), name, "ours_{}".format(iteration), "renders")
-    gts_path = os.path.join(OUTPUT_PATH, name, "ours_{}".format(iteration), "gt")
-
+    gts_path = os.path.join(OUTPUT_PATH, os.path.basename(model_path) , name, "ours_{}".format(iteration), "gt")
     makedirs(render_path, exist_ok=True)
     makedirs(gts_path, exist_ok=True)
 

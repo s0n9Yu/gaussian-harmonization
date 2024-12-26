@@ -63,6 +63,7 @@ class GaussianModel:
         self.optimizer = None
         self.percent_dense = 0
         self.spatial_lr_scale = 0
+        self.object_mask = torch.empty(0)
         self.setup_functions()
 
     def capture(self):
@@ -312,6 +313,13 @@ class GaussianModel:
         self._rotation = nn.Parameter(torch.tensor(rots, dtype=torch.float, device="cuda").requires_grad_(True))
 
         self.active_sh_degree = self.max_sh_degree
+
+        # object mask by gaussian grouping
+        try:
+            self.object_mask = np.asarray(plydata.elements[0]["mask"])
+        except Exception as e:
+            print("the ply file might not contain object mask")
+            print(e)
 
     def replace_tensor_to_optimizer(self, tensor, name):
         optimizable_tensors = {}
