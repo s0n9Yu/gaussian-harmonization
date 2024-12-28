@@ -127,6 +127,9 @@ def get_combined_args(parser : ArgumentParser, customized_setting={}):
     except TypeError:
         print("Config file not found at")
         pass
+    except FileNotFoundError:
+        print("file not found error")
+        pass
     args_cfgfile = eval(cfgfile_string)
 
     for k,v in vars(args_cfgfile).items():
