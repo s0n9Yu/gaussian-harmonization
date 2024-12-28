@@ -21,6 +21,7 @@ from utils.general_utils import safe_state
 from argparse import ArgumentParser
 from arguments import ModelParams, PipelineParams, get_combined_args, GroupParams, Namespace
 from gaussian_renderer import GaussianModel
+from dataloader import HarmonizationDataset
 try:
     from diff_gaussian_rasterization import SparseGaussianAdam
     SPARSE_ADAM_AVAILABLE = True
@@ -46,8 +47,11 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
 
 def render_sets(dataset : ModelParams, iteration : int, pipeline : PipelineParams, skip_train : bool, skip_test : bool, separate_sh: bool):
     with torch.no_grad():
-        gaussians = GaussianModel(dataset.sh_degree)
-        scene = Scene(dataset, gaussians, load_iteration=iteration, shuffle=False)
+        #gaussians = GaussianModel(dataset.sh_degree)
+        #scene = Scene(dataset, gaussians, load_iteration=iteration, shuffle=False)
+        dset = HarmonizationDataset(3, "/home_nfs/s0n9yu/gaussian-grouping/output")
+        scene = dset[2]
+        gaussians = scene.gaussians
 
         bg_color = [1,1,1] if dataset.white_background else [0, 0, 0]
         background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
@@ -62,7 +66,7 @@ if __name__ == "__main__":
     pipeline = PipelineParams(parser)
     custom_args = {
         "model_path": MODEL_PATH,
-        "source_path": SOURCE_PATH, 
+        #"source_path": SOURCE_PATH, 
         "depths": "",
         "train_test_exp": False
     }
@@ -71,7 +75,7 @@ if __name__ == "__main__":
     parser.add_argument("--skip_test", action="store_true")
     parser.add_argument("--quiet", action="store_true")
     args = get_combined_args(parser, custom_args)
-    #print(vars(args))
+    #print("original: ", vars(args))
     print("Rendering " + args.model_path)
 
     # Initialize system state (RNG)
