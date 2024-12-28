@@ -6,6 +6,12 @@ from arguments import ModelParams, PipelineParams, get_combined_args, GroupParam
 from gaussian_renderer import GaussianModel
 from scene import Scene
 
+
+def simply_setting_value(color_dc, color_rest):
+    color_dc[:] = torch.tensor([[255, 0, 0]], dtype = torch.float32)
+    color_rest[:] = torch.tensor([[255, 0, 0]], dtype = torch.float32)
+    return color_dc, color_rest
+
 class HarmonizationDataset(Dataset):
     def __init__(self, sh_deg, scene_dir, iteration=-1, transform=None):
         self.gs_scenes = [os.path.join(scene_dir, f) for f in os.listdir(scene_dir) if os.path.isdir(os.path.join(scene_dir, f))]
@@ -28,6 +34,11 @@ class HarmonizationDataset(Dataset):
 
         gaussians = GaussianModel(self.sh_deg)
         scene = Scene(args, gaussians, self.iteration, shuffle=False)
+        
+        if self.transform != None:
+            objidx = 132 # TODO: randomly choosing obj index (with some criteria)
+            mask = scene.gaussians.object_mask == objidx
+            scene.gaussians.transform_setup(mask, self.transform)
 
         return scene
 

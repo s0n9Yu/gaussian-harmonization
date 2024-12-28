@@ -21,7 +21,7 @@ from utils.general_utils import safe_state
 from argparse import ArgumentParser
 from arguments import ModelParams, PipelineParams, get_combined_args, GroupParams, Namespace
 from gaussian_renderer import GaussianModel
-from dataloader import HarmonizationDataset
+from dataloader import HarmonizationDataset, simply_setting_value
 try:
     from diff_gaussian_rasterization import SparseGaussianAdam
     SPARSE_ADAM_AVAILABLE = True
@@ -49,8 +49,9 @@ def render_sets(dataset : ModelParams, iteration : int, pipeline : PipelineParam
     with torch.no_grad():
         #gaussians = GaussianModel(dataset.sh_degree)
         #scene = Scene(dataset, gaussians, load_iteration=iteration, shuffle=False)
-        dset = HarmonizationDataset(3, "/home_nfs/s0n9yu/gaussian-grouping/output")
-        scene = dset[2]
+        dset = HarmonizationDataset(3, "/home_nfs/s0n9yu/gaussian-grouping/output", transform=simply_setting_value)
+        #dset = HarmonizationDataset(3, "/home_nfs/s0n9yu/gaussian-grouping/output")
+        scene = dset[118]
         gaussians = scene.gaussians
 
         bg_color = [1,1,1] if dataset.white_background else [0, 0, 0]

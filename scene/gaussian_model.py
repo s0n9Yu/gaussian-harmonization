@@ -210,7 +210,26 @@ class GaussianModel:
                                                         lr_delay_steps=training_args.exposure_lr_delay_steps,
                                                         lr_delay_mult=training_args.exposure_lr_delay_mult,
                                                         max_steps=training_args.iterations)
+    def transform_setup(self, mask, transfromation):
 
+        # Extracting subsets using the mask
+        features_dc_sub = self._features_dc[mask].detach()
+        features_rest_sub = self._features_rest[mask].detach()
+        features_dc_original = self._features_dc.detach().clone()
+        features_rest_original = self._features_rest.detach().clone()
+
+        def set_requires_grad(tensor, requires_grad):
+            """Returns a new tensor with the specified requires_grad setting."""
+            return tensor.detach().clone().requires_grad_(requires_grad)
+
+        features_dc_sub, features_rest_sub = transfromation(features_dc_sub, features_rest_sub)
+        features_dc_original[mask] = features_dc_sub
+        features_rest_original[mask] = features_rest_sub
+
+        # Construct nn.Parameters with specified gradients
+        self._features_dc = nn.Parameter(set_requires_grad(features_dc_original, False))
+        self._features_rest = nn.Parameter(set_requires_grad(features_rest_original, False))
+        
     def update_learning_rate(self, iteration):
         ''' Learning rate scheduling per step '''
         if self.pretrained_exposures is None:
